@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator, Alert, Switch } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator, Alert, Switch, Linking } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -29,7 +29,6 @@ const SYSTEMS = [
   { id: 'home', name: 'G-Lock Home', sub: 'Front Door', icon: 'home-outline', activeIcon: 'home', color: GOLD },
   { id: 'ride', name: 'G-Lock Ride', sub: 'E-Bike / Motorbike', icon: 'bicycle-outline', activeIcon: 'bicycle', color: GOLD },
 ];
-
 // G-Lock Value Props
 const VALUE_PROPS = [
   { icon: 'shield-checkmark', title: 'Zero Cloud', desc: 'Your biometric data never leaves your device' },
@@ -37,11 +36,29 @@ const VALUE_PROPS = [
   { icon: 'hardware-chip', title: 'On-Device AI', desc: 'ESP32-S3 processes everything locally' },
   { icon: 'shield', title: 'Patent Protected', desc: 'UK IPO No. 2613849.5' },
 ];
-
 // ============ DASHBOARD SCREEN ============
 function DashboardScreen({ navigation }) {
   const [activeSystem, setActiveSystem] = useState('home');
-  const [armed, setArmed] = useState({ home: false, ride: false });
+  const [armed, setArmed] = useState({ home: false, ride: false 
+  // Shop
+  shopCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: CARD, borderRadius: 12, padding: 16, marginBottom: 10,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  shopIcon: {
+    width: 48, height: 48, borderRadius: 12,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  shopName: { color: WHITE, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  shopSub: { color: MUTED, fontSize: 12, marginBottom: 4 },
+  shopPrice: { color: GOLD, fontSize: 14, fontWeight: '700' },
+  shopBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: GOLD, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
+  },
+  shopBtnText: { color: '#000', fontSize: 12, fontWeight: '700' },
+});
   const [faces, setFaces] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -232,6 +249,28 @@ function DashboardScreen({ navigation }) {
             </View>
           );
         })}
+
+        {/* Get G-Lock Shop */}
+        <Text style={s.sectionTitle}>Get G-Lock</Text>
+        {PRODUCTS.map(prod => (
+          <View key={prod.id} style={s.shopCard}>
+            <View style={[s.shopIcon, { backgroundColor: 'rgba(187,144,30,0.1)' }]}>
+              <Ionicons name={prod.icon} size={24} color={GOLD} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.shopName}>{prod.name}</Text>
+              <Text style={s.shopSub}>{prod.sub}</Text>
+              <Text style={s.shopPrice}>{prod.price}</Text>
+            </View>
+            <TouchableOpacity
+              style={s.shopBtn}
+              onPress={() => Linking.openURL(prod.url).catch(() => Alert.alert('Coming Soon', prod.name + ' will be available soon at ' + prod.url))}
+            >
+              <Ionicons name="cart" size={18} color="#000" />
+              <Text style={s.shopBtnText}>{prod.price === 'Learn More' ? 'VISIT' : 'BUY'}</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
 
         {/* Recent Activity */}
         <Text style={s.sectionTitle}>Recent Activity</Text>
