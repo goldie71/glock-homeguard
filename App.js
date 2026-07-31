@@ -16,6 +16,7 @@ const MUTED = '#7a8a9a';
 const WHITE = '#f0f0f0';
 const GREEN = '#27ae60';
 const RED = '#c0392b';
+const BLUE = '#1a3a5c';
 
 const API_BASE = 'https://base44.app/api/apps/6a2ba35443a73e3d0cbd1deb';
 const ENTITY_FACES = API_BASE + '/entities/EnrolledFace';
@@ -23,9 +24,16 @@ const ENTITY_EVENTS = API_BASE + '/entities/LockEvent';
 
 const Tab = createBottomTabNavigator();
 
+// System types
+const SYSTEMS = [
+  { id: 'home', name: 'G-Lock Home', sub: 'Front Door', icon: 'home-outline', activeIcon: 'home', color: GOLD },
+  { id: 'ride', name: 'G-Lock Ride', sub: 'E-Bike / Motorbike', icon: 'bicycle-outline', activeIcon: 'bicycle', color: GOLD },
+];
+
 // ============ DASHBOARD SCREEN ============
 function DashboardScreen({ navigation }) {
-  const [armed, setArmed] = useState(false);
+  const [activeSystem, setActiveSystem] = useState('home');
+  const [armed, setArmed] = useState({ home: false, ride: false });
   const [faces, setFaces] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,12 +42,12 @@ function DashboardScreen({ navigation }) {
     try {
       const [facesRes, eventsRes] = await Promise.all([
         fetch(ENTITY_FACES + '?limit=100').then(r => r.json()),
-        fetch(ENTITY_EVENTS + '?limit=5&sort=-created_date').then(r => r.json()),
+        fetch(ENTITY_EVENTS + '?limit=10&sort=-created_date').then(r => r.json()),
       ]);
       setFaces(facesRes.data || facesRes || []);
       setEvents(eventsRes.data || eventsRes || []);
     } catch (e) {
-      // offline mode - use empty data
+      // offline mode
     } finally {
       setLoading(false);
     }
@@ -48,22 +56,25 @@ function DashboardScreen({ navigation }) {
   useEffect(() => { loadData(); }, [loadData]);
 
   function toggleArm() {
-    setArmed(!armed);
-    // Log the event
+    setArmed(prev => ({ ...prev, [activeSystem]: !prev[activeSystem] }));
+    const systemName = activeSystem === 'home' ? 'G-Lock Home' : 'G-Lock Ride';
     fetch(ENTITY_EVENTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event_type: !armed ? 'ARM' : 'DISARM',
+        event_type: !armed[activeSystem] ? 'ARM' : 'DISARM',
         person_identified: 'Owner',
         confidence_score: 100,
-        camera_source: 'Mobile App',
+        camera_source: systemName + ' App',
         timestamp: new Date().toISOString(),
-        action_taken: !armed ? 'System Armed' : 'System Disarmed',
+        action_taken: (!armed[activeSystem] ? 'System Armed' : 'System Disarmed') + ' - ' + systemName,
         notified_owner: true
       })
     }).catch(() => {});
   }
+
+  const currentSystem = SYSTEMS.find(s => s.id === activeSystem);
+  const isArmed = armed[activeSystem];
 
   return (
     <SafeAreaView style={s.screen}>
@@ -80,25 +91,57 @@ function DashboardScreen({ navigation }) {
           <Text style={s.patentBadge}>Patent 2613849.5</Text>
         </View>
 
+        {/* System Selector */}
+        <Text style={s.selectorLabel}>SELECT SYSTEM</Text>
+        <View style={s.systemSelector}>
+          {SYSTEMS.map(sys => (
+            <TouchableOpacity
+              key={sys.id}
+              style={[s.systemTab, activeSystem === sys.id && s.systemTabActive]}
+              onPress={() => setActiveSystem(sys.id)}
+            >
+              <Ionicons
+                name={activeSystem === sys.id ? sys.activeIcon : sys.icon}
+                size={20}
+                color={activeSystem === sys.id ? '#000' : MUTED}
+              />
+              <View>
+                <Text style={[s.systemTabName, activeSystem === sys.id && s.systemTabNameActive]}>
+                  {sys.name}
+                </Text>
+                <Text style={[s.systemTabSub, activeSystem === sys.id && s.systemTabSubActive]}>
+                  {sys.sub}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Status Card */}
-        <View style={[s.statusCard, armed ? s.statusArmed : s.statusDisarmed]}>
+        <View style={[s.statusCard, isArmed ? s.statusArmed : s.statusDisarmed]}>
           <View style={s.statusIconWrap}>
-            <Ionicons name={armed ? 'shield-checkmark' : 'shield-outline'} size={48} color={armed ? GREEN : MUTED} />
+            <Ionicons
+              name={isArmed ? 'shield-checkmark' : 'shield-outline'}
+              size={48}
+              color={isArmed ? GREEN : MUTED}
+            />
           </View>
-          <Text style={s.statusLabel}>SYSTEM STATUS</Text>
-          <Text style={[s.statusValue, { color: armed ? GREEN : MUTED }]}>
-            {armed ? 'ARMED' : 'DISARMED'}
+          <Text style={s.statusLabel}>{currentSystem.name.toUpperCase()} STATUS</Text>
+          <Text style={[s.statusValue, { color: isArmed ? GREEN : MUTED }]}>
+            {isArmed ? 'ARMED' : 'DISARMED'}
           </Text>
           <Text style={s.statusSub}>
-            {armed ? 'Your property is protected' : 'System is currently inactive'}
+            {isArmed
+              ? activeSystem === 'home' ? 'Your home is secured' : 'Your ride is protected'
+              : activeSystem === 'home' ? 'Front door is unlocked' : 'Bike is not immobilized'}
           </Text>
           <TouchableOpacity
-            style={[s.armBtn, armed ? s.disarmBtn : s.armBtnActive]}
+            style={[s.armBtn, isArmed ? s.disarmBtn : s.armBtnActive]}
             onPress={toggleArm}
           >
-            <Ionicons name={armed ? 'unlock-outline' : 'lock-closed'} size={20} color={armed ? '#fff' : '#000'} />
-            <Text style={[s.armBtnText, { color: armed ? '#fff' : '#000' }]}>
-              {armed ? 'DISARM SYSTEM' : 'ARM SYSTEM'}
+            <Ionicons name={isArmed ? 'unlock-outline' : 'lock-closed'} size={20} color={isArmed ? '#fff' : '#000'} />
+            <Text style={[s.armBtnText, { color: isArmed ? '#fff' : '#000' }]}>
+              {isArmed ? 'DISARM ' + currentSystem.name.toUpperCase() : 'ARM ' + currentSystem.name.toUpperCase()}
             </Text>
           </TouchableOpacity>
         </View>
@@ -111,9 +154,9 @@ function DashboardScreen({ navigation }) {
             <Text style={s.statLabel}>Enrolled Faces</Text>
           </View>
           <View style={s.statCard}>
-            <Ionicons name="hardware-chip" size={24} color={GOLD} />
-            <Text style={s.statNum}>2</Text>
-            <Text style={s.statLabel}>Connected Units</Text>
+            <Ionicons name={activeSystem === 'home' ? 'lock-closed' : 'bicycle'} size={24} color={GOLD} />
+            <Text style={s.statNum}>{isArmed ? 'ON' : 'OFF'}</Text>
+            <Text style={s.statLabel}>{currentSystem.sub}</Text>
           </View>
           <View style={s.statCard}>
             <Ionicons name="notifications" size={24} color={GOLD} />
@@ -121,6 +164,52 @@ function DashboardScreen({ navigation }) {
             <Text style={s.statLabel}>Recent Events</Text>
           </View>
         </View>
+
+        {/* System Info Cards */}
+        <Text style={s.sectionTitle}>Your Systems</Text>
+        {SYSTEMS.map(sys => {
+          const sysArmed = armed[sys.id];
+          return (
+            <View key={sys.id} style={s.systemCard}>
+              <View style={[s.systemCardIcon, { backgroundColor: sysArmed ? 'rgba(39,174,96,0.15)' : 'rgba(187,144,30,0.1)' }]}>
+                <Ionicons name={sys.activeIcon} size={28} color={sysArmed ? GREEN : GOLD} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.systemCardName}>{sys.name}</Text>
+                <Text style={s.systemCardSub}>{sys.sub}</Text>
+                <View style={[s.systemStatusBadge, { backgroundColor: sysArmed ? GREEN : 'rgba(122,138,154,0.2)' }]}>
+                  <Text style={[s.systemStatusText, { color: sysArmed ? '#fff' : MUTED }]}>
+                    {sysArmed ? 'ARMED' : 'DISARMED'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[s.systemCardBtn, sysArmed ? s.systemCardBtnDisarm : s.systemCardBtnArm]}
+                onPress={() => {
+                  setActiveSystem(sys.id);
+                  setTimeout(() => {
+                    setArmed(prev => ({ ...prev, [sys.id]: !prev[sys.id] }));
+                    fetch(ENTITY_EVENTS, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        event_type: !sysArmed ? 'ARM' : 'DISARM',
+                        person_identified: 'Owner',
+                        confidence_score: 100,
+                        camera_source: sys.name + ' App',
+                        timestamp: new Date().toISOString(),
+                        action_taken: (!sysArmed ? 'System Armed' : 'System Disarmed') + ' - ' + sys.name,
+                        notified_owner: true
+                      })
+                    }).catch(() => {});
+                  }, 100);
+                }}
+              >
+                <Ionicons name={sysArmed ? 'unlock-outline' : 'lock-closed'} size={18} color={sysArmed ? '#fff' : '#000'} />
+              </TouchableOpacity>
+            </View>
+          );
+        })}
 
         {/* Recent Activity */}
         <Text style={s.sectionTitle}>Recent Activity</Text>
@@ -131,7 +220,7 @@ function DashboardScreen({ navigation }) {
         ) : (
           events.slice(0, 5).map((evt, i) => (
             <View key={i} style={s.eventCard}>
-              <View style={[s.eventDot, { backgroundColor: evt.event_type === 'ARM' ? GREEN : evt.event_type === 'ALERT' ? RED : GOLD }]} />
+              <View style={[s.eventDot, { backgroundColor: (evt.event_type || '').toUpperCase() === 'ARM' ? GREEN : (evt.event_type || '').toUpperCase() === 'ALERT' ? RED : GOLD }]} />
               <View style={{ flex: 1 }}>
                 <Text style={s.eventType}>{evt.event_type || 'EVENT'}</Text>
                 <Text style={s.eventDetail}>{evt.action_taken || evt.person_identified || 'System activity'}</Text>
@@ -273,9 +362,9 @@ function ActivityScreen() {
           renderItem={({ item }) => (
             <View style={s.eventCard}>
               <View style={[s.eventDot, {
-                backgroundColor: item.event_type === 'ARM' ? GREEN :
-                  item.event_type === 'ALERT' ? RED :
-                  item.event_type === 'ENROLL' ? GOLD : MUTED
+                backgroundColor: (item.event_type || '').toUpperCase() === 'ARM' ? GREEN :
+                  (item.event_type || '').toUpperCase() === 'ALERT' ? RED :
+                  (item.event_type || '').toUpperCase() === 'ENROLL' ? GOLD : MUTED
               }]} />
               <View style={{ flex: 1 }}>
                 <Text style={s.eventType}>{item.event_type || 'EVENT'}</Text>
@@ -312,22 +401,26 @@ function SettingsScreen() {
           <Text style={s.pageTitle}>Settings</Text>
         </View>
 
-        {/* Device Info */}
-        <Text style={s.settingsSection}>DEVICES</Text>
+        {/* Connected Systems */}
+        <Text style={s.settingsSection}>CONNECTED SYSTEMS</Text>
         <View style={s.settingsCard}>
           <View style={s.deviceRow}>
-            <Ionicons name="hardware-chip" size={24} color={GOLD} />
+            <View style={[s.deviceIcon, { backgroundColor: 'rgba(187,144,30,0.1)' }]}>
+              <Ionicons name="home" size={20} color={GOLD} />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={s.deviceName}>G-Lock Brain (Head Unit)</Text>
-              <Text style={s.deviceStatus}>Status: Connected</Text>
+              <Text style={s.deviceName}>G-Lock Home (Front Door)</Text>
+              <Text style={s.deviceStatus}>ESP32-S3 · Facial Recognition Lock</Text>
             </View>
             <View style={[s.onlineDot, { backgroundColor: GREEN }]} />
           </View>
           <View style={s.deviceRow}>
-            <Ionicons name="battery-half" size={24} color={GOLD} />
+            <View style={[s.deviceIcon, { backgroundColor: 'rgba(187,144,30,0.1)' }]}>
+              <Ionicons name="bicycle" size={20} color={GOLD} />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={s.deviceName}>G-Lock Muscle (Battery Unit)</Text>
-              <Text style={s.deviceStatus}>Status: Connected</Text>
+              <Text style={s.deviceName}>G-Lock Ride (E-Bike)</Text>
+              <Text style={s.deviceStatus}>Brain + Muscle · BLE Immobilizer</Text>
             </View>
             <View style={[s.onlineDot, { backgroundColor: GREEN }]} />
           </View>
@@ -346,14 +439,14 @@ function SettingsScreen() {
           <View style={s.toggleRow}>
             <View style={{ flex: 1 }}>
               <Text style={s.toggleLabel}>Auto-Arm on Disconnect</Text>
-              <Text style={s.toggleSub}>Arm system when head unit disconnects</Text>
+              <Text style={s.toggleSub}>Arm Ride when head unit disconnects</Text>
             </View>
             <Switch value={autoArm} onValueChange={setAutoArm} trackColor={{ false: '#333', true: GOLD }} thumbColor={autoArm ? '#fff' : '#666'} />
           </View>
           <View style={s.toggleRow}>
             <View style={{ flex: 1 }}>
-              <Text style={s.toggleLabel}>GPS Tracking</Text>
-              <Text style={s.toggleSub}>Track location when armed</Text>
+              <Text style={s.toggleLabel}>GPS Tracking (Ride)</Text>
+              <Text style={s.toggleSub}>Track location when Ride is armed</Text>
             </View>
             <Switch value={gpsTrack} onValueChange={setGpsTrack} trackColor={{ false: '#333', true: GOLD }} thumbColor={gpsTrack ? '#fff' : '#666'} />
           </View>
@@ -364,7 +457,7 @@ function SettingsScreen() {
         <View style={s.settingsCard}>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Version</Text>
-            <Text style={s.aboutValue}>1.1.0</Text>
+            <Text style={s.aboutValue}>1.2.0</Text>
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Patent</Text>
@@ -372,15 +465,15 @@ function SettingsScreen() {
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Inventors</Text>
-            <Text style={s.aboutValue}>Shane & Alexis Goldsmith</Text>
+            <Text style={s.aboutValue}>Shane &amp; Alexis Goldsmith</Text>
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Company</Text>
-            <Text style={s.aboutValue}>Goldsmith & Co Ltd, Gibraltar</Text>
+            <Text style={s.aboutValue}>Goldsmith &amp; Co Ltd, Gibraltar</Text>
           </View>
         </View>
 
-        <Text style={s.footerText}>Part of Goldsmith & Company Limited, Gibraltar</Text>
+        <Text style={s.footerText}>Part of Goldsmith &amp; Company Limited, Gibraltar</Text>
         <Text style={s.footerText}>The Goldsmith Group of Companies</Text>
         <Text style={s.footerText}>Registered in Gibraltar</Text>
       </ScrollView>
@@ -446,7 +539,7 @@ const s = StyleSheet.create({
   scrollContent: { padding: 20 },
 
   // Header
-  header: { marginBottom: 24 },
+  header: { marginBottom: 20 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
   logoBadge: {
     width: 44, height: 44, borderRadius: 10,
@@ -459,6 +552,24 @@ const s = StyleSheet.create({
     color: MUTED, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase',
     marginTop: 4,
   },
+
+  // System Selector
+  selectorLabel: { color: MUTED, fontSize: 10, letterSpacing: 3, fontWeight: '700', marginBottom: 10 },
+  systemSelector: {
+    flexDirection: 'row', gap: 10, marginBottom: 20,
+  },
+  systemTab: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: CARD, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  systemTabActive: {
+    backgroundColor: GOLD, borderColor: GOLD,
+  },
+  systemTabName: { color: MUTED, fontSize: 13, fontWeight: '700' },
+  systemTabNameActive: { color: '#000' },
+  systemTabSub: { color: '#555', fontSize: 10 },
+  systemTabSubActive: { color: 'rgba(0,0,0,0.6)' },
 
   // Status Card
   statusCard: {
@@ -478,7 +589,7 @@ const s = StyleSheet.create({
   },
   armBtnActive: { backgroundColor: GOLD },
   disarmBtn: { backgroundColor: 'rgba(192,57,43,0.2)', borderWidth: 1, borderColor: RED },
-  armBtnText: { fontSize: 14, fontWeight: '700', letterSpacing: 1 },
+  armBtnText: { fontSize: 13, fontWeight: '700', letterSpacing: 1 },
 
   // Stats
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
@@ -491,6 +602,29 @@ const s = StyleSheet.create({
 
   // Section
   sectionTitle: { color: GOLD, fontSize: 12, letterSpacing: 3, fontWeight: '700', marginBottom: 12, textTransform: 'uppercase' },
+
+  // System Cards
+  systemCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: CARD, borderRadius: 12, padding: 16, marginBottom: 10,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  systemCardIcon: {
+    width: 48, height: 48, borderRadius: 12,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  systemCardName: { color: WHITE, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  systemCardSub: { color: MUTED, fontSize: 12, marginBottom: 6 },
+  systemStatusBadge: {
+    alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10,
+  },
+  systemStatusText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
+  systemCardBtn: {
+    width: 40, height: 40, borderRadius: 10,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  systemCardBtnArm: { backgroundColor: GOLD },
+  systemCardBtnDisarm: { backgroundColor: 'rgba(192,57,43,0.2)', borderWidth: 1, borderColor: RED },
 
   // Events
   eventCard: {
@@ -547,6 +681,7 @@ const s = StyleSheet.create({
   settingsSection: { color: GOLD, fontSize: 11, letterSpacing: 3, fontWeight: '700', marginBottom: 10, marginTop: 20, textTransform: 'uppercase' },
   settingsCard: { backgroundColor: CARD, borderRadius: 12, borderWidth: 1, borderColor: BORDER, overflow: 'hidden' },
   deviceRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderBottomWidth: 1, borderBottomColor: BORDER },
+  deviceIcon: { width: 40, height: 40, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   deviceName: { color: WHITE, fontSize: 14, fontWeight: '600', marginBottom: 2 },
   deviceStatus: { color: MUTED, fontSize: 12 },
   onlineDot: { width: 10, height: 10, borderRadius: 5 },
