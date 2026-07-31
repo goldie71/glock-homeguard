@@ -8,12 +8,21 @@
       "distribution": "internal"
     },
     "production": {
+      "ios": {
+        "autoIncrement": true
+      },
       "android": {
         "buildType": "app-bundle"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "s.goldsmith@live.com",
+        "ascAppId": "",
+        "appleTeamId": "8X94P5WL5G"
+      }
+    }
   }
 }
