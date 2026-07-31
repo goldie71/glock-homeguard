@@ -5,19 +5,11 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "image": "latest",
-      "hooks": {
-        "preInstall": "./eas-hooks/pre-install.sh"
-      }
+      "distribution": "internal"
     },
     "production": {
       "android": {
         "buildType": "app-bundle"
-      },
-      "image": "latest",
-      "hooks": {
-        "preInstall": "./eas-hooks/pre-install.sh"
       }
     }
   },
