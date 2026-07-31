@@ -431,12 +431,12 @@ function SettingsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={s.codeGName}>Code-G</Text>
-              <Text style={s.codeGSub}>Powered by Goldsmith Technology</Text>
+              <Text style={s.codeGSub}>Powered by G-Lock</Text>
             </View>
             <Ionicons name="open-outline" size={18} color={GOLD} />
           </View>
           <Text style={s.codeGDesc}>
-            Code-G is the technology platform behind G-Lock — biometric access control, IoT security, and connected device management. Visit code-g.co.uk
+            Code-G is powered by G-Lock technology — biometric access control, IoT security, and connected device management. Visit code-g.co.uk
           </Text>
         </View>
 
@@ -519,7 +519,7 @@ function SettingsScreen() {
         <Text style={s.footerText}>Part of Goldsmith &amp; Company Limited, Gibraltar</Text>
         <Text style={s.footerText}>The Goldsmith Group of Companies</Text>
         <Text style={s.footerText}>Registered in Gibraltar · All prices exclude UK VAT</Text>
-        <Text style={[s.footerText, { color: GOLD, marginTop: 12 }]}>Powered by Code-G</Text>
+        <Text style={[s.footerText, { color: GOLD, marginTop: 12 }]}>Powered by G-Lock</Text>
       </ScrollView>
     </SafeAreaView>
   );
