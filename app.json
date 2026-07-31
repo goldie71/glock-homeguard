@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "G-Lock",
+    "slug": "g-lock-homeguard",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0e17"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.goldsmith.glock"
+    },
+    "android": {
+      "package": "com.goldsmith.glock",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0e17"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c07b1939-9c54-4d4f-ad3b-6aa787629e7e"
+      }
+    }
+  }
+}
