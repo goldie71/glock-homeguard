@@ -13,14 +13,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.goldsmith.glock"
+      "bundleIdentifier": "com.goldsmith.glock",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "G-Lock needs camera access to enroll faces for biometric security",
+        "NSFaceIDUsageDescription": "G-Lock uses Face ID for secure access control"
+      }
     },
     "android": {
       "package": "com.goldsmith.glock",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0a0e17"
-      }
+      },
+      "permissions": ["android.permission.CAMERA", "android.permission.INTERNET"]
     },
     "extra": {
       "eas": {

@@ -475,7 +475,7 @@ function SettingsScreen() {
             <Ionicons name="open-outline" size={18} color={GOLD} />
           </View>
           <Text style={s.codeGDesc}>
-            Code-G is powered by G-Lock technology — biometric access control, IoT security, and connected device management. Visit code-g.co.uk
+            Code-G is powered by G-Lock technology — biometric access control, IoT security, and connected device management. Visit codegid.com
           </Text>
         </View>
 
@@ -539,7 +539,7 @@ function SettingsScreen() {
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Platform</Text>
-            <Text style={s.aboutValue}>Code-G · code-g.co.uk</Text>
+            <Text style={s.aboutValue}>Code-G · codegid.com</Text>
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Patent</Text>
