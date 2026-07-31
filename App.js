@@ -30,6 +30,14 @@ const SYSTEMS = [
   { id: 'ride', name: 'G-Lock Ride', sub: 'E-Bike / Motorbike', icon: 'bicycle-outline', activeIcon: 'bicycle', color: GOLD },
 ];
 
+// G-Lock Value Props
+const VALUE_PROPS = [
+  { icon: 'shield-checkmark', title: 'Zero Cloud', desc: 'Your biometric data never leaves your device' },
+  { icon: 'key-off', title: 'No Keys Needed', desc: 'Your face is the only key you need' },
+  { icon: 'hardware-chip', title: 'On-Device AI', desc: 'ESP32-S3 processes everything locally' },
+  { icon: 'shield', title: 'Patent Protected', desc: 'UK IPO No. 2613849.5' },
+];
+
 // ============ DASHBOARD SCREEN ============
 function DashboardScreen({ navigation }) {
   const [activeSystem, setActiveSystem] = useState('home');
@@ -163,6 +171,20 @@ function DashboardScreen({ navigation }) {
             <Text style={s.statNum}>{loading ? '...' : events.length}</Text>
             <Text style={s.statLabel}>Recent Events</Text>
           </View>
+        </View>
+
+        {/* G-Lock Value Props */}
+        <Text style={s.sectionTitle}>Why G-Lock</Text>
+        <View style={s.valueGrid}>
+          {VALUE_PROPS.map((vp, i) => (
+            <View key={i} style={s.valueCard}>
+              <View style={s.valueIcon}>
+                <Ionicons name={vp.icon} size={22} color={GOLD} />
+              </View>
+              <Text style={s.valueTitle}>{vp.title}</Text>
+              <Text style={s.valueDesc}>{vp.desc}</Text>
+            </View>
+          ))}
         </View>
 
         {/* System Info Cards */}
@@ -401,6 +423,23 @@ function SettingsScreen() {
           <Text style={s.pageTitle}>Settings</Text>
         </View>
 
+        {/* Code-G Banner */}
+        <View style={s.codeGBanner}>
+          <View style={s.codeGLogoRow}>
+            <View style={s.codeGBadge}>
+              <Text style={s.codeGBadgeText}>CG</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.codeGName}>Code-G</Text>
+              <Text style={s.codeGSub}>Powered by Goldsmith Technology</Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color={GOLD} />
+          </View>
+          <Text style={s.codeGDesc}>
+            Code-G is the technology platform behind G-Lock — biometric access control, IoT security, and connected device management. Visit code-g.co.uk
+          </Text>
+        </View>
+
         {/* Connected Systems */}
         <Text style={s.settingsSection}>CONNECTED SYSTEMS</Text>
         <View style={s.settingsCard}>
@@ -456,8 +495,12 @@ function SettingsScreen() {
         <Text style={s.settingsSection}>ABOUT</Text>
         <View style={s.settingsCard}>
           <View style={s.aboutRow}>
-            <Text style={s.aboutLabel}>Version</Text>
-            <Text style={s.aboutValue}>1.2.0</Text>
+            <Text style={s.aboutLabel}>App Version</Text>
+            <Text style={s.aboutValue}>1.3.0</Text>
+          </View>
+          <View style={s.aboutRow}>
+            <Text style={s.aboutLabel}>Platform</Text>
+            <Text style={s.aboutValue}>Code-G · code-g.co.uk</Text>
           </View>
           <View style={s.aboutRow}>
             <Text style={s.aboutLabel}>Patent</Text>
@@ -475,7 +518,8 @@ function SettingsScreen() {
 
         <Text style={s.footerText}>Part of Goldsmith &amp; Company Limited, Gibraltar</Text>
         <Text style={s.footerText}>The Goldsmith Group of Companies</Text>
-        <Text style={s.footerText}>Registered in Gibraltar</Text>
+        <Text style={s.footerText}>Registered in Gibraltar · All prices exclude UK VAT</Text>
+        <Text style={[s.footerText, { color: GOLD, marginTop: 12 }]}>Powered by Code-G</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -603,6 +647,21 @@ const s = StyleSheet.create({
   // Section
   sectionTitle: { color: GOLD, fontSize: 12, letterSpacing: 3, fontWeight: '700', marginBottom: 12, textTransform: 'uppercase' },
 
+  // Value Props
+  valueGrid: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24,
+  },
+  valueCard: {
+    width: '48%', flexGrow: 1, backgroundColor: CARD, borderRadius: 12, padding: 18,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  valueIcon: {
+    width: 40, height: 40, borderRadius: 10, backgroundColor: 'rgba(187,144,30,0.1)',
+    justifyContent: 'center', alignItems: 'center', marginBottom: 10,
+  },
+  valueTitle: { color: WHITE, fontSize: 13, fontWeight: '700', marginBottom: 4 },
+  valueDesc: { color: MUTED, fontSize: 11, lineHeight: 15 },
+
   // System Cards
   systemCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
@@ -676,6 +735,21 @@ const s = StyleSheet.create({
   filterTabActive: { backgroundColor: GOLD, borderColor: GOLD },
   filterText: { color: MUTED, fontSize: 11, fontWeight: '600', letterSpacing: 1 },
   filterTextActive: { color: '#000' },
+
+  // Code-G Banner
+  codeGBanner: {
+    backgroundColor: CARD, borderRadius: 16, padding: 20, marginBottom: 24,
+    borderWidth: 1, borderColor: 'rgba(187,144,30,0.3)',
+  },
+  codeGLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  codeGBadge: {
+    width: 40, height: 40, borderRadius: 10, borderWidth: 2, borderColor: GOLD,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  codeGBadgeText: { color: GOLD, fontWeight: '900', fontSize: 14, letterSpacing: -1 },
+  codeGName: { color: WHITE, fontSize: 18, fontWeight: '800', letterSpacing: 1 },
+  codeGSub: { color: GOLD, fontSize: 11, letterSpacing: 2, textTransform: 'uppercase' },
+  codeGDesc: { color: MUTED, fontSize: 12, lineHeight: 18 },
 
   // Settings
   settingsSection: { color: GOLD, fontSize: 11, letterSpacing: 3, fontWeight: '700', marginBottom: 10, marginTop: 20, textTransform: 'uppercase' },
