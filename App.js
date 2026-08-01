@@ -39,26 +39,7 @@ const VALUE_PROPS = [
 // ============ DASHBOARD SCREEN ============
 function DashboardScreen({ navigation }) {
   const [activeSystem, setActiveSystem] = useState('home');
-  const [armed, setArmed] = useState({ home: false, ride: false 
-  // Shop
-  shopCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: CARD, borderRadius: 12, padding: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: BORDER,
-  },
-  shopIcon: {
-    width: 48, height: 48, borderRadius: 12,
-    justifyContent: 'center', alignItems: 'center',
-  },
-  shopName: { color: WHITE, fontSize: 15, fontWeight: '700', marginBottom: 2 },
-  shopSub: { color: MUTED, fontSize: 12, marginBottom: 4 },
-  shopPrice: { color: GOLD, fontSize: 14, fontWeight: '700' },
-  shopBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: GOLD, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
-  },
-  shopBtnText: { color: '#000', fontSize: 12, fontWeight: '700' },
-});
+  const [armed, setArmed] = useState({ home: false, ride: false });
   const [faces, setFaces] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -805,4 +786,22 @@ const s = StyleSheet.create({
   aboutLabel: { color: MUTED, fontSize: 13 },
   aboutValue: { color: WHITE, fontSize: 13, fontWeight: '600' },
   footerText: { color: '#444', fontSize: 10, textAlign: 'center', marginTop: 4 },
+
+  shopCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: CARD, borderRadius: 12, padding: 16, marginBottom: 10,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  shopIcon: {
+    width: 48, height: 48, borderRadius: 12,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  shopName: { color: WHITE, fontSize: 15, fontWeight: '700', marginBottom: 2 },
+  shopSub: { color: MUTED, fontSize: 12, marginBottom: 4 },
+  shopPrice: { color: GOLD, fontSize: 14, fontWeight: '700' },
+  shopBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: GOLD, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8,
+  },
+  shopBtnText: { color: '#000', fontSize: 12, fontWeight: '700' },
 });
