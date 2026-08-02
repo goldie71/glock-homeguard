@@ -18,7 +18,10 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "G-Lock needs camera access to enroll faces for biometric security",
         "NSFaceIDUsageDescription": "G-Lock uses Face ID for secure access control"
-      }
+      },
+      "buildNumber": "1",
+      "appleId": "shanegoldsmith@icloud.com",
+      "teamId": "8X94P5WL5G"
     },
     "android": {
       "package": "com.goldsmith.glock",

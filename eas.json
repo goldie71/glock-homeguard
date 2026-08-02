@@ -9,7 +9,14 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "ios": {
+        "simulator": false
+      }
     },
     "production": {
       "ios": {
@@ -22,6 +29,11 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "shanegoldsmith@icloud.com",
+        "appleTeamId": "8X94P5WL5G"
+      }
+    }
   }
 }
